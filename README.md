@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="viz/flappy.gif" alt="GIF do Jogo" width="800"/>
+<img src="viz/flappy.gif" alt="GIF do Jogo" width="400"/>
 
 ---
 
