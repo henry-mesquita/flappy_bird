@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="viz/flappy.gif" alt="GIF do Jogo" width="800"/>
+<img src="viz/flappy.mp4" alt="GIF do Jogo" width="800"/>
 
 ---
 
@@ -10,11 +10,24 @@
 
 Este projeto é uma cópia fiel do famoso jogo Flappy Bird feito em Python com a biblioteca pygame.
 
-## Tecnologias Utilizadas
+### Tecnologias Utilizadas
 
 - **Linguagem:** Python
 - **Biblioteca Gráfica:** Pygame
 - **Outras bibliotecas `built-in`**
+
+### Funcionalidades
+
+- Movimento de pulo do pássaro.
+- Geração procedural de canos com vãos aleatórios.
+- Sistema de pontuação em tempo real.
+- Detecção de colisão com os canos e com os limites da tela.
+
+---
+
+## Controles
+
+- **Barra de Espaço** ou **Seta para Cima**: Faz o pássaro pular.
 
 ---
 
