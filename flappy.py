@@ -9,7 +9,7 @@ from time import time
 from random import randint
 
 class FlappyBird:
-    def __init__(self) -> None:
+    def __init__(self, criar_passaro: bool = True) -> None:
         """
         Inicializa o jogo Flappy Bird.
 
@@ -25,12 +25,12 @@ class FlappyBird:
         self.caminho_pasta_img = join('img')
         self.caminho_pasta_font = join('font')
         self.criar_enfeites()
-        self.criar_passaro()
+        if criar_passaro:
+            self.criar_passaro()
         self.criar_canos()
         self.atualizar_icone()
         self.teclas_permitidas = [pg.K_UP, pg.K_SPACE]
         self.pontuacao = 0
-        self.fonte = pg.font.Font(join(self.caminho_pasta_font, 'flappy_bird.ttf'), 70)
         
         if QUANTIDADE_CANO > 0:
             self.idx_cano_atual = 0
@@ -45,7 +45,7 @@ class FlappyBird:
         icone = pg.image.load(join(self.caminho_pasta_img, 'flap1.png')).convert_alpha()
         pg.display.set_icon(icone)
     
-    def escrever_texto(self, info: str | int, x: int, y: int) -> None:
+    def escrever_texto(self, info: str | int, x: int, y: int, tamanho: int = 30) -> None:
         """
         Escreve um texto na tela.
 
@@ -56,7 +56,8 @@ class FlappyBird:
         Returns:
             None
         """
-        superficie_texto = self.fonte.render(str(info), True, (255, 255, 255))
+        fonte = pg.font.Font(join(self.caminho_pasta_font, 'flappy_bird.ttf'), tamanho)
+        superficie_texto = fonte.render(str(info), True, (255, 255, 255))
         retangulo_texto = superficie_texto.get_rect(center=(x, y))
         self.tela.blit(superficie_texto, retangulo_texto)
 
@@ -76,7 +77,7 @@ class FlappyBird:
         if passou_do_cano:
             self.pontuacao += 1
             self.idx_cano_atual += 1
-        self.escrever_texto(self.pontuacao, x=LARGURA_TELA // 2, y=100)
+        self.escrever_texto(self.pontuacao, x=LARGURA_TELA // 2, y=100, tamanho=70)
 
     def criar_enfeites(self) -> None:
         """
