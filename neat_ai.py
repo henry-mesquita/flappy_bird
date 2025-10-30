@@ -1,6 +1,8 @@
 import os
 import pygame as pg
+from pygame.time import Clock
 import neat
+from neat.nn import FeedForwardNetwork
 from flappy import FlappyBird
 from passaro import Passaro
 from constants import *
@@ -16,20 +18,20 @@ def eval_genomes(genomes, config) -> None:
     Returns:
         None
     """
-    redes: list[neat.nn.FeedForwardNetwork] = []
-    passaros: list[Passaro] = []
-    ge = []
+    redes:      list[FeedForwardNetwork]    = []
+    ge:         list[neat.DefaultGenome]    = []
+    passaros:   list[Passaro]               = []
 
-    jogo = FlappyBird(criar_passaro=False)
-    clock = pg.time.Clock()
+    jogo: FlappyBird        = FlappyBird(criar_passaro=False)
+    clock: Clock            = Clock()
 
     for _, g in genomes:
-        net = neat.nn.FeedForwardNetwork.create(g, config)
+        net: FeedForwardNetwork = FeedForwardNetwork.create(g, config)
         redes.append(net)
         g.fitness = 0
         ge.append(g)
 
-        passaro = Passaro(
+        passaro: Passaro = Passaro(
             tela=jogo.tela,
             sprites=[pg.image.load(os.path.join("img", f"flap{i}.png")).convert_alpha() for i in range(1, 4)],
             posicao=POSICAO_INICIAL_PASSARO.copy(),
@@ -37,7 +39,9 @@ def eval_genomes(genomes, config) -> None:
         )
 
         passaros.append(passaro)
-    
+
+    class AbortTraining(Exception):
+        pass
 
     rodando = True
     idx_cano_atual = 0
@@ -47,8 +51,7 @@ def eval_genomes(genomes, config) -> None:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 rodando = False
-                pg.quit()
-                return
+                raise AbortTraining()
         
         jogo.resetar_enfeites()
         jogo.resetar_canos()
@@ -56,9 +59,9 @@ def eval_genomes(genomes, config) -> None:
         if idx_cano_atual == QUANTIDADE_CANO:
             idx_cano_atual = 0
         
-        cano_sup_ref = jogo.canos_sup[idx_cano_atual]
-        cano_inf_ref = jogo.canos_inf[idx_cano_atual]
-        x_passaro = passaros[0].posicao.x
+        cano_sup_ref    = jogo.canos_sup[idx_cano_atual]
+        cano_inf_ref    = jogo.canos_inf[idx_cano_atual]
+        x_passaro       = passaros[0].posicao.x
 
         passou_do_cano = x_passaro > cano_sup_ref.posicao.x + DIMENSOES_CANO.x - 10
         if passou_do_cano:
@@ -83,34 +86,8 @@ def eval_genomes(genomes, config) -> None:
 
             ge[i].fitness += 10
 
-            colidiu_tela = (
-                passaro.posicao.y < 0 or
-                passaro.posicao.y + DIMENSOES_PASSARO.y > ALTURA_TELA - DIMENSOES_CHAO.y
-            )
-
-            colidiu_cano = False
-
-            for cano in range(QUANTIDADE_CANO):
-                x_passaro = passaro.posicao.x
-                y_passaro = passaro.posicao.y
-                x_cano_inf = jogo.canos_inf[cano].posicao.x
-                y_cano_inf = jogo.canos_inf[cano].posicao.y
-                rect_cano_inf = jogo.canos_inf[cano].sprite.get_rect(topleft=(x_cano_inf, y_cano_inf))
-
-                x_cano = jogo.canos_sup[cano].posicao.x
-                y_cano = jogo.canos_sup[cano].posicao.y
-                rect_cano_sup = jogo.canos_sup[cano].sprite.get_rect(topleft=(x_cano, y_cano))
-
-                try:
-                    rect_passaro = passaro.sprite_rotacionado.get_rect(topleft=(x_passaro, y_passaro))
-                except AttributeError:
-                    rect_passaro = passaro.sprites[passaro.frame_atual - 1].get_rect(topleft=(x_passaro, y_passaro))
-
-                colisao_superior: bool = rect_passaro.colliderect(rect_cano_inf)
-                colisao_inferior: bool = rect_passaro.colliderect(rect_cano_sup)
-
-                if colisao_superior or colisao_inferior:
-                    colidiu_cano = True
+            colidiu_tela = jogo.verificar_colisao_tela(passaro)
+            colidiu_cano = jogo.verificar_colisao_canos(passaro)
             
             if colidiu_tela or colidiu_cano:
                 ge[i].fitness -= 50
@@ -131,18 +108,24 @@ def eval_genomes(genomes, config) -> None:
             jogo.canos_sup[idx].movimentar(delta_time)
             jogo.canos_sup[idx].desenhar()
 
+        for passaro in passaros:
+            passaro.desenhar()
+
         for chao in jogo.chaos:
             chao.movimentar(delta_time)
             chao.desenhar()
 
-        for passaro in passaros:
-            passaro.desenhar()
-        
-        jogo.escrever_texto(f"Individuos: {len(passaros)}", LARGURA_TELA // 2, 30)
-        pg.display.flip()
+        global geracao
 
+        jogo.escrever_texto(f"Individuos:{len(passaros)}", LARGURA_TELA // 2, 30)
+        jogo.escrever_texto(f"Geracao:{geracao}", LARGURA_TELA // 2, 60)
+
+        pg.display.flip()
         if len(passaros) == 0:
+            geracao += 1
             rodando = False
+
+geracao: int = 0
 
 def rodar(config_path) -> None:
     """
@@ -161,8 +144,9 @@ def rodar(config_path) -> None:
         neat.DefaultStagnation,
         config_path
     )
-
+    global geracao
     populacao = neat.Population(config)
+    geracao = populacao.generation
     populacao.add_reporter(neat.StdOutReporter(True))
     populacao.add_reporter(neat.StatisticsReporter())
     populacao.run(eval_genomes, 100)

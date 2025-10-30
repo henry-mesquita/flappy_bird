@@ -269,16 +269,18 @@ class FlappyBird:
                 self.canos_sup[cano].posicao.y = novo_y_cano_sup
                 self.canos_inf[cano].posicao.y = novo_y_cano_inf
 
-    def verificar_colisao_canos(self) -> bool:
+    def verificar_colisao_canos(self, passaro: Passaro) -> bool:
         """
         Verifica se o passaro colidiu com o cano.
 
+        Args:
+            passaro (Passaro): O passaro a ser verificado.
         Returns:
             bool: True se houver colisão, False caso contrário.
         """
         for cano in range(QUANTIDADE_CANO):
-            x_passaro = self.passaro.posicao.x
-            y_passaro = self.passaro.posicao.y
+            x_passaro = passaro.posicao.x
+            y_passaro = passaro.posicao.y
             x_cano_inf = self.canos_inf[cano].posicao.x
             y_cano_inf = self.canos_inf[cano].posicao.y
             rect_cano_inf = self.canos_inf[cano].sprite.get_rect(topleft=(x_cano_inf, y_cano_inf))
@@ -288,43 +290,49 @@ class FlappyBird:
             rect_cano_sup = self.canos_sup[cano].sprite.get_rect(topleft=(x_cano, y_cano))
 
             try:
-                rect_passaro = self.passaro.sprite_rotacionado.get_rect(topleft=(x_passaro, y_passaro))
+                rect_passaro = passaro.sprite_rotacionado.get_rect(topleft=(x_passaro, y_passaro))
             except AttributeError:
-                rect_passaro = self.passaro.sprites[self.passaro.frame_atual - 1].get_rect(topleft=(x_passaro, y_passaro))
+                rect_passaro = passaro.sprites[self.passaro.frame_atual - 1].get_rect(topleft=(x_passaro, y_passaro))
 
-            colisao_superior: bool = rect_passaro.colliderect(rect_cano_inf)
-            colisao_inferior: bool = rect_passaro.colliderect(rect_cano_sup)
+            colisao_superior = rect_passaro.colliderect(rect_cano_inf)
+            colisao_inferior = rect_passaro.colliderect(rect_cano_sup)
 
             if colisao_superior or colisao_inferior:
                 return True
         return False
 
-    def verificar_colisao_tela(self) -> bool:
+    def verificar_colisao_tela(self, passaro: Passaro) -> bool:
         """
         Verifica se o passaro colidiu com o teto ou com o chão.
 
+        Args:
+            passaro (Passaro): O passaro a ser verificado.
         Returns:
             bool: True se houver colisão, False caso contrário.
         """
-        return self.verificar_colisao_teto() or self.verificar_colisao_chao()
+        return self.verificar_colisao_teto(passaro) or self.verificar_colisao_chao(passaro)
         
-    def verificar_colisao_chao(self) -> bool:
+    def verificar_colisao_chao(self, passaro: Passaro) -> bool:
         """
         Verifica se o passaro colidiu com o chão.
 
+        Args:
+            passaro (Passaro): O passaro a ser verificado.
         Returns:
             bool: True se houver colisão, False caso contrário.
         """
-        return self.passaro.posicao.y + DIMENSOES_PASSARO.y > ALTURA_TELA - DIMENSOES_CHAO.y
+        return passaro.posicao.y + DIMENSOES_PASSARO.y > ALTURA_TELA - DIMENSOES_CHAO.y
 
-    def verificar_colisao_teto(self) -> bool:
+    def verificar_colisao_teto(self, passaro: Passaro) -> bool:
         """
         Verifica se o passaro colidiu com o teto.
 
+        Args:
+            passaro (Passaro): O passaro a ser verificado.
         Returns:
             bool: True se houver colisão, False caso contrário.
         """
-        return self.passaro.posicao.y < 0
+        return passaro.posicao.y < 0
 
     def zerar_velocidade_tudo(self) -> None:
         """
@@ -383,12 +391,12 @@ class FlappyBird:
         Returns:
             bool: True se houver colisão, False caso contrário.
         """
-        if self.verificar_colisao_canos():
+        if self.verificar_colisao_canos(self.passaro):
             if not self.passaro_morto:
                 self.passaro.velocidade_y = 0
                 self.passaro_morto = True
             self.resetar_jogo(delta_time)
-        if self.verificar_colisao_teto() or self.verificar_colisao_chao():
+        if self.verificar_colisao_tela(self.passaro):
             if not self.passaro_morto:
                 self.passaro.velocidade_y = 0
                 self.passaro_morto = True
@@ -446,18 +454,11 @@ class FlappyBird:
         """
         self.fundo.desenhar()
 
-        for nuvem in self.nuvens:
-            nuvem.movimentar(delta_time)
-            nuvem.desenhar()
+        for grupo in (self.nuvens, self.predios, self.arvores):
+            for enfeite in grupo:
+                enfeite.movimentar(delta_time)
+                enfeite.desenhar()
 
-        for predio in self.predios:
-            predio.movimentar(delta_time)
-            predio.desenhar()
-
-        for arvore in self.arvores:
-            arvore.movimentar(delta_time)
-            arvore.desenhar()
-        
         for cano in range(QUANTIDADE_CANO):
             self.canos_inf[cano].movimentar(delta_time)
             self.canos_inf[cano].desenhar()
@@ -506,7 +507,7 @@ class FlappyBird:
                 self.event_loop()
                 self.resetar_enfeites()
                 self.resetar_canos()
-                if not self.verificar_colisao_chao():
+                if not self.verificar_colisao_chao(self.passaro):
                     self.passaro.aplicar_gravidade(delta_time)
                     self.passaro.aplicar_angulo(delta_time)
                 if not self.passaro_morto:
