@@ -418,8 +418,8 @@ class FlappyBird:
             self.tempo_inicial += delta_time
             return
 
-        self.pontuacao = 0
-        self.idx_cano_atual = 0
+        self.pontuacao              = 0
+        self.idx_cano_atual         = 0
         self.tempo_inicial          = 0
         self.passaro.velocidade_y   = 0
         self.passaro.posicao        = POSICAO_INICIAL_PASSARO.copy()
