@@ -84,8 +84,6 @@ A janela do Pygame abrirá e você verá múltiplas gerações de pássaros tent
 
 ---
 
----
-
 ## Créditos e Inspiração
 
 Este projeto foi fortemente inspirado pelo código original em C++ desenvolvido por **Victor Dias** do canal **Universo Programado**. O código foi adaptado e reescrito em Python, com a adição posterior da inteligência artificial usando NEAT.
