@@ -41,7 +41,7 @@ O objetivo principal foi não apenas recriar o jogo, mas também explorar como u
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 Siga os passos abaixo para rodar tanto a versão manual quanto a simulação da IA.
 
@@ -63,7 +63,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### ▶️ Jogando a Versão Manual
+### Jogando a Versão Manual
 
 Para jogar o Flappy Bird manualmente, execute o arquivo `main.py`:
 
@@ -73,7 +73,7 @@ python main.py
 **Controles:**
 - **Barra de Espaço** ou **Seta para Cima**: Faz o pássaro pular.
 
-### 🧠 Rodando a Simulação da IA
+### Rodando a Simulação da IA
 
 Para iniciar o treinamento da rede neural NEAT, execute o arquivo `neat_ai.py`:
 
