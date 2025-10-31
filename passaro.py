@@ -1,12 +1,12 @@
 import pygame as pg
 from pygame import Vector2
 from constants import *
+from os.path import join
 
 class Passaro:
     def __init__(
             self,
             tela:               pg.Surface,
-            sprites:            list[pg.Surface],
             posicao:            Vector2,
             dimensoes_sprite:   Vector2
     ) -> None:
@@ -22,13 +22,24 @@ class Passaro:
         """
         self.tela: pg.Surface           = tela
         self.posicao: Vector2           = posicao
-        self.sprites: list[pg.Surface]  = [pg.transform.scale(sprite, dimensoes_sprite) for sprite in sprites]
         self.velocidade_y: float        = 0
         self.dimensoes_sprite: Vector2  = dimensoes_sprite
         self.frame_atual: int           = 0
         self.tempo_animacao: float      = 0.0
         self.intervalo_frame: float     = 0.07
         self.angulo: int                = -20
+    
+        caminhos: list[str] = [
+            join("img", 'flap1.png'),
+            join("img", 'flap2.png'),
+            join("img", 'flap3.png')
+        ]
+
+        self.sprites: list[pg.Surface] = [
+            pg.image.load(caminhos[0]).convert_alpha(),
+            pg.image.load(caminhos[1]).convert_alpha(),
+            pg.image.load(caminhos[2]).convert_alpha()
+        ]
 
     def aplicar_gravidade(self, delta_time: float) -> None:
         """

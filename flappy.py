@@ -161,21 +161,8 @@ class FlappyBird:
         Returns:
             None
         """
-        caminhos: list[str] = [
-            join(self.caminho_pasta_img, 'flap1.png'),
-            join(self.caminho_pasta_img, 'flap2.png'),
-            join(self.caminho_pasta_img, 'flap3.png')
-        ]
-
-        frames: list[pg.Surface] = [
-            pg.image.load(caminhos[0]).convert_alpha(),
-            pg.image.load(caminhos[1]).convert_alpha(),
-            pg.image.load(caminhos[2]).convert_alpha()
-        ]
-
         self.passaro: Passaro = Passaro(
             tela=self.tela,
-            sprites=frames,
             posicao=POSICAO_INICIAL_PASSARO.copy(),
             dimensoes_sprite=DIMENSOES_PASSARO.copy()
         )

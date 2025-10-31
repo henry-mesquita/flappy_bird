@@ -33,7 +33,6 @@ def eval_genomes(genomes, config) -> None:
 
         passaro: Passaro = Passaro(
             tela=jogo.tela,
-            sprites=[pg.image.load(os.path.join("img", f"flap{i}.png")).convert_alpha() for i in range(1, 4)],
             posicao=POSICAO_INICIAL_PASSARO.copy(),
             dimensoes_sprite=DIMENSOES_PASSARO.copy()
         )
