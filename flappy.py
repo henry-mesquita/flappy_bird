@@ -1,5 +1,6 @@
 import pygame as pg
 from pygame import Vector2
+from pygame.font import Font
 from constants import *
 from cano import Cano
 from passaro import Passaro
@@ -7,30 +8,38 @@ from enfeite import Enfeite
 from os.path import join
 from time import time
 from random import randint
+from typing import Optional, Any
 
 class FlappyBird:
-    def __init__(self, criar_passaro: bool = True) -> None:
+    def __init__(self, criar_passaro: Optional[bool]=True) -> None:
         """
         Inicializa o jogo Flappy Bird.
 
+        Args:
+            criar_passaro (bool, optional): Define se o passaro deve ser criado. Defaults to True.
         Returns:
             None
         """
+        # JANELA
         pg.init()
         pg.display.set_caption('Flappy Bird')
         self.tela: pg.Surface = pg.display.set_mode((LARGURA_TELA, ALTURA_TELA))
         self.clock: pg.time.Clock = pg.time.Clock()
+
+        # ATT JOGO
         self.passaro_morto = False
         self.tempo_inicial = 0
-        self.caminho_pasta_img = join('img')
-        self.caminho_pasta_font = join('font')
+        self.pontuacao = 0
+
+        # METODOS JOGO
         self.criar_enfeites()
-        if criar_passaro:
-            self.criar_passaro()
         self.criar_canos()
         self.atualizar_icone()
-        self.teclas_permitidas = [pg.K_UP, pg.K_SPACE]
-        self.pontuacao = 0
+        if criar_passaro:
+            self.criar_passaro()
+            self.teclas_permitidas = [pg.K_UP, pg.K_SPACE]
+        else:
+            self.passaro = None
         
         if QUANTIDADE_CANO > 0:
             self.idx_cano_atual = 0
@@ -42,10 +51,16 @@ class FlappyBird:
         Returns:
             None
         """
-        icone = pg.image.load(join(self.caminho_pasta_img, 'flap1.png')).convert_alpha()
+        icone = pg.image.load(join("img", 'flap1.png')).convert_alpha()
         pg.display.set_icon(icone)
     
-    def escrever_texto(self, info: str | int, x: int, y: int, tamanho: int = 30) -> None:
+    def escrever_texto(
+            self,
+            info:       Any,
+            x:          int,
+            y:          int,
+            tamanho:    int = 30
+    ) -> None:
         """
         Escreve um texto na tela.
 
@@ -56,9 +71,9 @@ class FlappyBird:
         Returns:
             None
         """
-        fonte = pg.font.Font(join(self.caminho_pasta_font, 'flappy_bird.ttf'), tamanho)
-        superficie_texto = fonte.render(str(info), True, (255, 255, 255))
-        retangulo_texto = superficie_texto.get_rect(center=(x, y))
+        fonte: Font = Font(join("font", 'flappy_bird.ttf'), tamanho)
+        superficie_texto: pg.Surface = fonte.render(str(info), True, (255, 255, 255))
+        retangulo_texto: pg.Rect = superficie_texto.get_rect(center=(x, y))
         self.tela.blit(superficie_texto, retangulo_texto)
 
     def atualizar_placar(self) -> None:
@@ -70,9 +85,11 @@ class FlappyBird:
         """
         if self.idx_cano_atual == QUANTIDADE_CANO:
             self.idx_cano_atual = 0
+
         cano_atual: Cano = self.canos_sup[self.idx_cano_atual]
         x_cano_atual = cano_atual.posicao.x
         x_passaro = self.passaro.posicao.x
+
         passou_do_cano: bool = x_passaro > x_cano_atual + DIMENSOES_CANO.x
         if passou_do_cano:
             self.pontuacao += 1
@@ -86,11 +103,11 @@ class FlappyBird:
         Returns:
             None
         """
-        caminho_sprite_fundo        = join(self.caminho_pasta_img, 'fundo.png')
-        caminho_sprite_chao         = join(self.caminho_pasta_img, 'chao.png')
-        caminho_sprite_nuvem        = join(self.caminho_pasta_img, 'nuvens.png')
-        caminho_sprite_predio       = join(self.caminho_pasta_img, 'predios.png')
-        caminho_sprite_arvore       = join(self.caminho_pasta_img, 'arvores.png')
+        caminho_sprite_fundo        = join("img", 'fundo.png')
+        caminho_sprite_chao         = join("img", 'chao.png')
+        caminho_sprite_nuvem        = join("img", 'nuvens.png')
+        caminho_sprite_predio       = join("img", 'predios.png')
+        caminho_sprite_arvore       = join("img", 'arvores.png')
 
         sprite_fundo: pg.Surface    = pg.image.load(caminho_sprite_fundo).convert_alpha()
         sprite_chao: pg.Surface     = pg.image.load(caminho_sprite_chao).convert_alpha()
@@ -98,7 +115,7 @@ class FlappyBird:
         sprite_predio: pg.Surface   = pg.image.load(caminho_sprite_predio).convert_alpha()
         sprite_arvore: pg.Surface   = pg.image.load(caminho_sprite_arvore).convert_alpha()
 
-        self.fundo = Enfeite(
+        self.fundo: Enfeite = Enfeite(
             tela=self.tela,
             sprite=sprite_fundo,
             posicao=Vector2(0, 0),
@@ -174,7 +191,7 @@ class FlappyBird:
         Returns:
             None
         """
-        caminho_sprite_cano = join(self.caminho_pasta_img, 'cano.png')
+        caminho_sprite_cano = join('img', 'cano.png')
         sprite_cano         = pg.image.load(caminho_sprite_cano).convert_alpha()
 
         self.canos_sup: list[Cano] = []
@@ -452,7 +469,8 @@ class FlappyBird:
             self.canos_sup[cano].movimentar(delta_time)
             self.canos_sup[cano].desenhar()
 
-        self.passaro.desenhar()
+        if self.passaro:
+            self.passaro.desenhar()
 
         for chao in self.chaos:
             chao.movimentar(delta_time)
@@ -490,20 +508,24 @@ class FlappyBird:
                 delta_time = current_time - last_time
                 last_time = current_time
 
-                self.verificar_morte(delta_time)
+                if self.passaro:
+                    self.verificar_morte(delta_time)
                 self.event_loop()
                 self.resetar_enfeites()
                 self.resetar_canos()
-                if not self.verificar_colisao_chao(self.passaro):
-                    self.passaro.aplicar_gravidade(delta_time)
-                    self.passaro.aplicar_angulo(delta_time)
-                if not self.passaro_morto:
-                    self.passaro.aplicar_animacao(delta_time)
+                if self.passaro:
+                    if not self.verificar_colisao_chao(self.passaro):
+                        self.passaro.aplicar_gravidade(delta_time)
+                        self.passaro.aplicar_angulo(delta_time)
+                if self.passaro:
+                    if not self.passaro_morto:
+                        self.passaro.aplicar_animacao(delta_time)
 
                 # DESENHAR
                 self.desenhar_tudo(delta_time)
-                if QUANTIDADE_CANO > 0:
-                    self.atualizar_placar()
+                if self.passaro:
+                    if QUANTIDADE_CANO > 0:
+                        self.atualizar_placar()
                 pg.display.flip()
                 self.clock.tick(FRAMERATE)
             except KeyboardInterrupt:
