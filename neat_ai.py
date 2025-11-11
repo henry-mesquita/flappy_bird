@@ -70,7 +70,7 @@ def eval_genomes(genomes, config) -> None:
             entrada = (
                 cano_sup_ref.posicao.x - passaro.posicao.x,
                 cano_inf_ref.posicao.y - passaro.posicao.y,
-                cano_sup_ref.posicao.y - passaro.posicao.y,
+                cano_sup_ref.posicao.y + DIMENSOES_CANO.y - passaro.posicao.y, # posição de entrada corrigida
                 passaro.velocidade_y,
                 passaro.angulo
             )
@@ -114,6 +114,23 @@ def eval_genomes(genomes, config) -> None:
             chao.movimentar(delta_time)
             chao.desenhar()
 
+        # print(cano_inf_ref.posicao.y, cano_sup_ref.posicao.y)
+
+        # pg.draw.line(
+        #     jogo.tela,
+        #     (255, 255, 255),
+        #     (cano_inf_ref.posicao.x, cano_inf_ref.posicao.y),
+        #     (cano_inf_ref.posicao.x + DIMENSOES_CANO.x, cano_inf_ref.posicao.y),
+        #     1
+        # )
+        # pg.draw.line(
+        #     jogo.tela,
+        #     (255, 255, 255),
+        #     (cano_sup_ref.posicao.x, cano_sup_ref.posicao.y + DIMENSOES_CANO.y),
+        #     (cano_sup_ref.posicao.x + DIMENSOES_CANO.x, cano_sup_ref.posicao.y + DIMENSOES_CANO.y),
+        #     1
+        # )
+
         global geracao
 
         jogo.escrever_texto(f"Individuos:{len(passaros)}", LARGURA_TELA // 2, 30)
@@ -148,7 +165,7 @@ def rodar(config_path) -> None:
     geracao = populacao.generation
     populacao.add_reporter(neat.StdOutReporter(True))
     populacao.add_reporter(neat.StatisticsReporter())
-    populacao.run(eval_genomes, 100)
+    populacao.run(eval_genomes, 30)
 
 if __name__ == "__main__":
     caminho_config = os.path.join(os.path.dirname(__file__), "config-feedforward.txt")
