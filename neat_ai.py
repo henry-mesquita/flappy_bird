@@ -22,7 +22,7 @@ def eval_genomes(genomes, config) -> None:
     ge:         list[neat.DefaultGenome]    = []
     passaros:   list[Passaro]               = []
 
-    jogo: FlappyBird        = FlappyBird(criar_passaro=False)
+    jogo: FlappyBird        = FlappyBird(criar_passaro=False, configuracoes_iniciais=True)
     clock: Clock            = Clock()
 
     for _, g in genomes:
@@ -119,23 +119,6 @@ def eval_genomes(genomes, config) -> None:
         for chao in jogo.chaos:
             chao.movimentar(delta_time)
             chao.desenhar()
-
-        # print(cano_inf_ref.posicao.y, cano_sup_ref.posicao.y)
-
-        # pg.draw.line(
-        #     jogo.tela,
-        #     (255, 255, 255),
-        #     (cano_inf_ref.posicao.x, cano_inf_ref.posicao.y),
-        #     (cano_inf_ref.posicao.x + DIMENSOES_CANO.x, cano_inf_ref.posicao.y),
-        #     1
-        # )
-        # pg.draw.line(
-        #     jogo.tela,
-        #     (255, 255, 255),
-        #     (cano_sup_ref.posicao.x, cano_sup_ref.posicao.y + DIMENSOES_CANO.y),
-        #     (cano_sup_ref.posicao.x + DIMENSOES_CANO.x, cano_sup_ref.posicao.y + DIMENSOES_CANO.y),
-        #     1
-        # )
 
         global geracao
 

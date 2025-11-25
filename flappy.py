@@ -11,12 +11,24 @@ from random import randint
 from typing import Optional, Any
 
 class FlappyBird:
-    def __init__(self, criar_passaro: Optional[bool]=True) -> None:
+    def __init__(
+            self,
+            criar_passaro: Optional[bool]=True,
+            configuracoes_iniciais: Optional[bool]=True
+    ) -> None:
+        self.criar_passaro: bool = criar_passaro
+        self.flag = False
+
+        if configuracoes_iniciais:
+            self.configuracoes_iniciais(self.criar_passaro)
+            self.flag = True
+
+    def configuracoes_iniciais(self, criar_passaro: Optional[bool]=True) -> None:
         """
         Inicializa o jogo Flappy Bird.
 
         Args:
-            criar_passaro (bool, optional): Define se o passaro deve ser criado. Defaults to True.
+            criar_passaro (bool, optional): Define se o passaro deve ser criado. Default é True.
         Returns:
             None
         """
@@ -27,23 +39,23 @@ class FlappyBird:
         self.clock: pg.time.Clock = pg.time.Clock()
 
         # ATT JOGO
-        self.passaro_morto = False
-        self.tempo_inicial = 0
-        self.pontuacao = 0
+        self.passaro_morto: bool    = False
+        self.tempo_inicial: int     = 0
+        self.pontuacao: int         = 0
 
         # METODOS JOGO
-        self.criar_enfeites()
-        self.criar_canos()
+        self.instanciar_enfeites()
+        self.instanciar_canos()
         self.atualizar_icone()
         if criar_passaro:
-            self.criar_passaro()
+            self.instanciar_passaro()
             self.teclas_permitidas = [pg.K_UP, pg.K_SPACE]
         else:
             self.passaro = None
         
         if QUANTIDADE_CANO > 0:
             self.idx_cano_atual = 0
-    
+
     def atualizar_icone(self) -> None:
         """
         Atualiza o icone do jogo.
@@ -96,7 +108,7 @@ class FlappyBird:
             self.idx_cano_atual += 1
         self.escrever_texto(self.pontuacao, x=LARGURA_TELA // 2, y=100, tamanho=70)
 
-    def criar_enfeites(self) -> None:
+    def instanciar_enfeites(self) -> None:
         """
         Cria os enfeites do jogo (fundo, chão, nuvens, prédios e árvores).
 
@@ -124,9 +136,9 @@ class FlappyBird:
         )
 
         self.chaos: list[Enfeite] = []
+        y_chao = ALTURA_TELA - DIMENSOES_CHAO.y
         for chao in range(QUANTIDADE_CHAO):
-            x_chao = 0 + (DIMENSOES_CHAO.x * chao)
-            y_chao = ALTURA_TELA - DIMENSOES_CHAO.y
+            x_chao = DIMENSOES_CHAO.x * chao
             self.chaos.append(Enfeite(
                 tela=self.tela,
                 sprite=sprite_chao,
@@ -136,9 +148,9 @@ class FlappyBird:
             ))
 
         self.arvores: list[Enfeite] = []
+        y_arvore = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y)
         for arvore in range(QUANTIDADE_ARVORE):
-            x_arvore = 0 + (DIMENSOES_ARVORE.x * arvore)
-            y_arvore = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y)
+            x_arvore = DIMENSOES_ARVORE.x * arvore
             self.arvores.append(Enfeite(
                 tela=self.tela,
                 sprite=sprite_arvore,
@@ -148,9 +160,9 @@ class FlappyBird:
             ))
 
         self.predios: list[Enfeite] = []
+        y_predio = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y + DIMENSOES_PREDIO.y - 10)
         for predio in range(QUANTIDADE_PREDIO):
-            x_predio = 0 + (DIMENSOES_PREDIO.x * predio)
-            y_predio = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y + DIMENSOES_PREDIO.y - 10)
+            x_predio = DIMENSOES_PREDIO.x * predio
             self.predios.append(Enfeite(
                 tela=self.tela,
                 sprite=sprite_predio,
@@ -160,9 +172,9 @@ class FlappyBird:
             ))
 
         self.nuvens: list[Enfeite] = []
+        y_nuvem = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y + DIMENSOES_PREDIO.y + 20)
         for nuvem in range(QUANTIDADE_NUVEM):
-            x_nuvem = 0 + (DIMENSOES_NUVEM.x * nuvem)
-            y_nuvem = ALTURA_TELA - (DIMENSOES_CHAO.y + DIMENSOES_ARVORE.y + DIMENSOES_PREDIO.y + 20)
+            x_nuvem = DIMENSOES_NUVEM.x * nuvem
             self.nuvens.append(Enfeite(
                 tela=self.tela,
                 sprite=sprite_nuvem,
@@ -171,7 +183,7 @@ class FlappyBird:
                 dimensoes_sprite=DIMENSOES_NUVEM.copy()
             ))
 
-    def criar_passaro(self) -> None:
+    def instanciar_passaro(self) -> None:
         """
         Cria o passaro do jogo.
 
@@ -190,7 +202,7 @@ class FlappyBird:
             )
         )
 
-    def criar_canos(self) -> None:
+    def instanciar_canos(self) -> None:
         """
         Cria os canos do jogo.
 
@@ -503,7 +515,8 @@ class FlappyBird:
         Returns:
             None
         """
-        pg.init()
+        if not self.flag:
+            self.configuracoes_iniciais(self.criar_passaro)
         self.running: bool = True
 
         last_time = time()
