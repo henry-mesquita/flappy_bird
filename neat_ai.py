@@ -31,13 +31,17 @@ def eval_genomes(genomes, config) -> None:
         g.fitness = 0
         ge.append(g)
 
-        passaro: Passaro = Passaro(
+        passaros.append(Passaro(
             tela=jogo.tela,
             posicao=POSICAO_INICIAL_PASSARO.copy(),
-            dimensoes_sprite=DIMENSOES_PASSARO.copy()
-        )
-
-        passaros.append(passaro)
+            dimensoes_sprite=DIMENSOES_PASSARO.copy(),
+            hitbox=pg.Rect(
+                POSICAO_INICIAL_PASSARO.x,
+                POSICAO_INICIAL_PASSARO.y,
+                DIMENSOES_PASSARO.x,
+                DIMENSOES_PASSARO.y
+            )
+        ))
 
     class AbortTraining(Exception):
         pass
@@ -84,6 +88,8 @@ def eval_genomes(genomes, config) -> None:
             passaro.aplicar_animacao(delta_time)
 
             ge[i].fitness += 10
+
+            passaro.atualizar_hitbox()
 
             colidiu_tela = jogo.verificar_colisao_tela(passaro)
             colidiu_cano = jogo.verificar_colisao_canos(passaro)

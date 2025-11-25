@@ -181,7 +181,13 @@ class FlappyBird:
         self.passaro: Passaro = Passaro(
             tela=self.tela,
             posicao=POSICAO_INICIAL_PASSARO.copy(),
-            dimensoes_sprite=DIMENSOES_PASSARO.copy()
+            dimensoes_sprite=DIMENSOES_PASSARO.copy(),
+            hitbox=pg.Rect(
+                POSICAO_INICIAL_PASSARO.x,
+                POSICAO_INICIAL_PASSARO.y,
+                DIMENSOES_PASSARO.x,
+                DIMENSOES_PASSARO.y
+            )
         )
 
     def criar_canos(self) -> None:
@@ -283,8 +289,8 @@ class FlappyBird:
             bool: True se houver colisão, False caso contrário.
         """
         for cano in range(QUANTIDADE_CANO):
-            x_passaro = passaro.posicao.x
-            y_passaro = passaro.posicao.y
+            # x_passaro = passaro.posicao.x
+            # y_passaro = passaro.posicao.y
             x_cano_inf = self.canos_inf[cano].posicao.x
             y_cano_inf = self.canos_inf[cano].posicao.y
             rect_cano_inf = self.canos_inf[cano].sprite.get_rect(topleft=(x_cano_inf, y_cano_inf))
@@ -293,13 +299,13 @@ class FlappyBird:
             y_cano = self.canos_sup[cano].posicao.y
             rect_cano_sup = self.canos_sup[cano].sprite.get_rect(topleft=(x_cano, y_cano))
 
-            try:
-                rect_passaro = passaro.sprite_rotacionado.get_rect(topleft=(x_passaro, y_passaro))
-            except AttributeError:
-                rect_passaro = passaro.sprites[self.passaro.frame_atual - 1].get_rect(topleft=(x_passaro, y_passaro))
+            # try:
+            #     rect_passaro = passaro.sprite_rotacionado.get_rect(topleft=(x_passaro, y_passaro))
+            # except AttributeError:
+            #     rect_passaro = passaro.sprites[self.passaro.frame_atual - 1].get_rect(topleft=(x_passaro, y_passaro))
 
-            colisao_superior = rect_passaro.colliderect(rect_cano_inf)
-            colisao_inferior = rect_passaro.colliderect(rect_cano_sup)
+            colisao_superior = passaro.hitbox.colliderect(rect_cano_inf)
+            colisao_inferior = passaro.hitbox.colliderect(rect_cano_sup)
 
             if colisao_superior or colisao_inferior:
                 return True
@@ -509,6 +515,7 @@ class FlappyBird:
                 last_time = current_time
 
                 if self.passaro:
+                    self.passaro.atualizar_hitbox()
                     self.verificar_morte(delta_time)
                 self.event_loop()
                 self.resetar_enfeites()

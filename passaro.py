@@ -8,7 +8,8 @@ class Passaro:
             self,
             tela:               pg.Surface,
             posicao:            Vector2,
-            dimensoes_sprite:   Vector2
+            dimensoes_sprite:   Vector2,
+            hitbox:             pg.Rect
     ) -> None:
         """
         Inicializa o passaro com suas características iniciais.
@@ -28,6 +29,7 @@ class Passaro:
         self.tempo_animacao: float      = 0.0
         self.intervalo_frame: float     = 0.07
         self.angulo: int                = -20
+        self.hitbox: pg.Rect            = hitbox
     
         caminhos: list[str] = [
             join("img", 'flap1.png'),
@@ -40,6 +42,12 @@ class Passaro:
             pg.image.load(caminhos[1]).convert_alpha(),
             pg.image.load(caminhos[2]).convert_alpha()
         ]
+    
+    def atualizar_hitbox(self) -> None:
+        self.hitbox.topleft = (
+            self.posicao.x,
+            self.posicao.y
+        )
 
     def aplicar_gravidade(self, delta_time: float) -> None:
         """
